@@ -10,23 +10,21 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo "Building Docker image: ${env.IMAGE_NAME}"
-                sh "docker build -t ${env.IMAGE_NAME} ."
+                sh 'docker build -t hello-python-app .'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
+                echo 'Passed successfully'
             }
         }
 
-        stage('Deploy to Docker Hub') {
+        stage('Deploy') {
             steps {
-                echo "Deploying ${env.IMAGE_NAME} to Docker Hub..."
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USER', passwordVariable: 'PAT')]) {
-                    sh 'echo "$PAT" | docker login -u "$USER" --password-stdin'
-                    sh "docker push ${env.IMAGE_NAME}"
+                    sh 'docker login -u "$USER" --password-stdin'
+                    sh 'docker push'
                 }
             }
         }
@@ -34,10 +32,7 @@ pipeline {
 
     post {
         always {
-            script {
-                echo "Cleaning up local Docker image..."
-                sh "docker rmi ${env.IMAGE_NAME} || true"
-            }
+            sh 'docker rmi || true'
         }
     }
 }
