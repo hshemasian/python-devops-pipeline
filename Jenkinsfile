@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'docker build -t hello-python-app .'
+                sh "docker build -t ${env.IMAGE_NAME} ."
             }
         }
 
@@ -23,8 +23,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USER', passwordVariable: 'PAT')]) {
-                    sh 'docker login -u "$USER" --password-stdin'
-                    sh 'docker push'
+                    sh 'echo "$PAT" | docker login -u "$USER" --password-stdin'
+                    sh "docker push ${env.IMAGE_NAME}"
                 }
             }
         }
@@ -32,7 +32,7 @@ pipeline {
 
     post {
         always {
-            sh 'docker rmi || true'
+            sh "docker rmi ${env.IMAGE_NAME} || true"
         }
     }
 }
