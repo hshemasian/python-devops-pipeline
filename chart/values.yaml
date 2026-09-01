@@ -1,0 +1,12 @@
+pods:
+  replicas: 2
+image:
+  repository: hillel456/python-devops-pipeline
+  tag: latest
+service:
+  type: ClusterIP
+  port: 5000
+  targetPort: 5000
+ingress:
+  enabled: true
+  host: app.local

@@ -1,53 +1,57 @@
-# 🐳 Containerized Python Application
+# 🚀 Python DevOps Pipeline
 
-A simple Python web application built using **Flask** and running inside a **Docker** container.
+A end-to-end Python Flask web application containerized with **Docker**, automated via **Jenkins**, and deployed to **Kubernetes** using **Helm**.
 
 ---
 
 ## 📁 Project Structure
 
-- `app.py`: Main Python Flask application code.
-- `requirements.txt`: List of Python dependencies (`Flask`).
-- `Dockerfile`: Instructions to build the Docker image.
-- `README.md`: Project documentation and setup instructions.
+```text
+.
+├── Dockerfile              # Instructions to build the Docker image
+├── Jenkinsfile             # CI/CD pipeline configuration
+├── README.md               # Project documentation
+├── app.py                  # Main Python Flask application
+├── requirements.txt        # Python dependencies
+└── chart/                  # Helm chart definitions
+    ├── Chart.yaml
+    ├── values.yaml
+    └── templates/
+        ├── deployment.yaml
+        ├── service.yaml
+        ├── ingress.yaml
+        └── _helpers.tpl
+🐳 Docker Commands
+1. Build the Docker Image
+Bash
+docker build -t hillel456/python-devops-pipeline:latest .
+2. Push Image to Docker Hub
+Bash
+docker push hillel456/python-devops-pipeline:latest
+☸️ Kubernetes & Helm Deployment
+1. Lint the Helm Chart
+Verify that the chart syntax and structure are correct:
 
----
+Bash
+helm lint chart
+2. Install / Upgrade the Chart
+Deploy the application to your Kubernetes cluster:
 
-## 🚀 How to Build and Run
+Bash
+helm install python-devops-pipeline chart
+If you make changes to the chart or values later, run:
 
-### 1. Build the Docker Image
-To build the Docker image from the Dockerfile, open your terminal in the project directory and run:
-```bash
-docker build -t hshemasian-app .
-```
+Bash
+helm upgrade python-devops-pipeline chart
+3. Verify Deployment
+Ensure all pods and services are running:
 
-### 2. Run the Container
-To start the container and map port 5000 on your machine to port 5000 inside the container, run:
-```bash
-docker run -p 5000:5000 hshemasian-app
-```
+Bash
+kubectl get all
+🌐 How to Access the App
+Forward local port 5000 to the deployed Kubernetes Service:
 
----
-
-## 🌐 How to Access the App
-
-Once the container is running, open your web browser and go to:
-👉 **http://localhost:5000**
-
-You should see the message from the Python app running inside the container!
-
----
-
-## 📌 Useful Docker Commands
-
-| Command | Description |
-| :--- | :--- |
-| `docker build -t hshemasian-app .` | Builds the project Docker image |
-| `docker run -p 5000:5000 hshemasian-app` | Runs the container and maps port 5000 |
-| `docker ps` | Shows all currently running containers |
-| `docker stop <CONTAINER_ID>` | Stops a running container |
-
----
-
-## 👤 Author
-* **Hillel Hai Shemasian** - [GitHub Profile](https://github.com/hshemasian)
+Bash
+kubectl port-forward svc/python-devops-pipeline 5000:5000
+Open your web browser and navigate to:
+👉 http://localhost:5000
