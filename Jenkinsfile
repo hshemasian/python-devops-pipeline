@@ -26,10 +26,18 @@ pipeline {
             }
         }
 
+        stage('Create Sonar Project') {
+            steps {
+                script {
+                    codeQuality.sonarCreateProject(env.APP_NAME)
+                }
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    myLibrary.sonarLocalScan(env.APP_NAME)
+                    codeQuality.sonarLocalScan(env.APP_NAME)
                 }
             }
         }
