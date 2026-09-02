@@ -29,7 +29,6 @@ pipeline {
         stage('Create Sonar Project') {
             steps {
                 script {
-                    // קריאה דרך codeQuality
                     codeQuality.sonarCreateProject(env.APP_NAME)
                 }
             }
@@ -38,7 +37,6 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    // קריאה דרך codeQuality (פותר את ה-NoSuchMethodError)
                     codeQuality.sonarLocalScan(env.APP_NAME)
                 }
             }
