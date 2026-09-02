@@ -26,6 +26,14 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    myLibrary.sonarLocalScan(env.APP_NAME)
+                }
+            }
+        }
+
         stage('Deploy to Docker Hub') {
             steps {
                 script {
