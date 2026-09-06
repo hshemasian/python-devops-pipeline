@@ -14,7 +14,6 @@ podTemplate(containers: [
         ],
         args: '--storage-driver=vfs'
     ),
-    // קונטיינר ה-Multitool שמכיל את Helm, Trivy, Git ו-Kubectl יחד
     containerTemplate(
         name: 'deployer', 
         image: 'elevy99927/k8s-deployer:latest',
@@ -56,53 +55,16 @@ podTemplate(containers: [
                     }
                 },
                 "Task 2 - Trivy Scan": {
-                    // יצירת תבנית HTML
                     container('deployer') {
-                        sh '''cat << 'EOF' > html.tpl
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Trivy Vulnerability Report</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
-    h1 { color: #333; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
-    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-    th { background-color: #343a40; color: white; }
-    .HIGH { background-color: #ffc107; font-weight: bold; }
-    .CRITICAL { background-color: #dc3545; color: white; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <h1>Trivy Vulnerability Report</h1>
-  <table>
-    <tr><th>Target</th><th>Library</th><th>Vulnerability</th><th>Severity</th><th>Installed</th><th>Fixed Version</th></tr>
-    {{ range . }}
-      {{ range .Vulnerabilities }}
-      <tr>
-        <td>{{ $.Target }}</td>
-        <td>{{ .PkgName }}</td>
-        <td><a href="{{ .PrimaryURL }}" target="_blank">{{ .VulnerabilityID }}</a></td>
-        <td class="{{ .Severity }}">{{ .Severity }}</td>
-        <td>{{ .InstalledVersion }}</td>
-        <td>{{ .FixedVersion }}</td>
-      </tr>
-      {{ end }}
-    {{ end }}
-  </table>
-</body>
-</html>
-EOF
-'''
-                        // הרצת Trivy ליצירת ה-HTML (רץ מאותו קונטיינר)
-                        sh "trivy image --format template --template '@html.tpl' --output trivy-report.html ${appimage}:${apptag}"
+                        // שימוש בפורמט ה-HTML המובנה של Trivy – מונע לחלוטין שגיאות תבנית
+                        sh "trivy image --format html --output trivy-report.html ${appimage}:${apptag}"
                     }
 
+                    // שמירת הדו"ח כ-Artifact ב-Jenkins
                     archiveArtifacts artifacts: 'trivy-report.html', allowEmptyArchive: true
 
-                    // הרצת סריקה שאינה מכשילה (exit-code 0)
                     container('deployer') {
+                        // הרצת הסריקה עם exit-code 0 כדי שהפלייסט ימשיך למרות ממצאי האבטחה
                         sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${appimage}:${apptag}"
                     }
                 }
@@ -120,7 +82,6 @@ EOF
         }
 
         stage('Deploy') {
-            // הרצת helm template ישירות מתוך קונטיינר ה-deployer
             container('deployer') {
                 sh "helm template hello-newapp ./chart > hello-newapp.yaml"
             }
