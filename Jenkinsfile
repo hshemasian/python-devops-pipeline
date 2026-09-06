@@ -14,20 +14,15 @@ podTemplate(containers: [
         ],
         args: '--storage-driver=vfs'
     ),
+    // קונטיינר ה-Multitool שמכיל את Helm, Trivy, Git ו-Kubectl יחד
     containerTemplate(
-        name: 'trivy', 
-        image: 'aquasec/trivy:latest',
+        name: 'deployer', 
+        image: 'elevy99927/k8s-deployer:latest',
         ttyEnabled: true,
         command: 'cat',
         envVars: [
             envVar(key: 'DOCKER_HOST', value: 'tcp://localhost:2375')
         ]
-    ),
-    containerTemplate(
-        name: 'helm',
-        image: 'alpine/helm:latest',
-        ttyEnabled: true,
-        command: 'cat'
     )
   ]
 ) {
@@ -35,7 +30,7 @@ podTemplate(containers: [
         def apptag = "${env.BUILD_NUMBER}"
 
         stage('Checkout') {
-            container('jnlp') {
+            container('deployer') {
                 sh '/usr/bin/git config --global http.sslVerify false'
                 checkout scm
             }
@@ -56,13 +51,13 @@ podTemplate(containers: [
         stage('Parallel Tasks') {
             parallel(
                 "Task 1": {
-                    container('jnlp') {
+                    container('deployer') {
                         sh "echo 'Running parallel checks...'"
                     }
                 },
                 "Task 2 - Trivy Scan": {
-                    // 1. יצירת תבנית HTML מקומית
-                    container('jnlp') {
+                    // יצירת תבנית HTML
+                    container('deployer') {
                         sh '''cat << 'EOF' > html.tpl
 <!DOCTYPE html>
 <html>
@@ -100,18 +95,14 @@ podTemplate(containers: [
 </html>
 EOF
 '''
-                    }
-
-                    // 2. הפקת דוח ה-HTML
-                    container('trivy') {
+                        // הרצת Trivy ליצירת ה-HTML (רץ מאותו קונטיינר)
                         sh "trivy image --format template --template '@html.tpl' --output trivy-report.html ${appimage}:${apptag}"
                     }
 
-                    // 3. שמירת ה-Artifact ב-Jenkins
                     archiveArtifacts artifacts: 'trivy-report.html', allowEmptyArchive: true
 
-                    // 4. הרצת הסריקה עם exit-code 0 כדי להבטיח שה-Pipeline ימשיך לרוץ גם אם נמצאו חולשות
-                    container('trivy') {
+                    // הרצת סריקה שאינה מכשילה (exit-code 0)
+                    container('deployer') {
                         sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${appimage}:${apptag}"
                     }
                 }
@@ -129,7 +120,8 @@ EOF
         }
 
         stage('Deploy') {
-            container('helm') {
+            // הרצת helm template ישירות מתוך קונטיינר ה-deployer
+            container('deployer') {
                 sh "helm template hello-newapp ./chart > hello-newapp.yaml"
             }
         }
