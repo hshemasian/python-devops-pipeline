@@ -56,12 +56,12 @@ podTemplate(containers: [
                 },
                 "Task 2 - Trivy Scan": {
                     container('deployer') {
-                        // שימוש בפורמט ה-HTML המובנה של Trivy – מונע לחלוטין שגיאות תבנית
-                        sh "trivy image --format html --output trivy-report.html ${appimage}:${apptag}"
+                        // שימוש בפורמט JSON שנתמך בגרסה המותקנת בקונטיינר
+                        sh "trivy image --format json --output trivy-report.json ${appimage}:${apptag}"
                     }
 
                     // שמירת הדו"ח כ-Artifact ב-Jenkins
-                    archiveArtifacts artifacts: 'trivy-report.html', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
 
                     container('deployer') {
                         // הרצת הסריקה עם exit-code 0 כדי שהפלייסט ימשיך למרות ממצאי האבטחה
