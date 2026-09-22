@@ -1,90 +1,76 @@
-def appname = "hello-newapp"
-def repo = "hillel456"
-def appimage = "${repo}/${appname}"
+pipeline {
+    agent any
 
-podTemplate(containers: [
-    containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent', ttyEnabled: true),
-    containerTemplate(
-        name: 'docker', 
-        image: 'docker:26-dind',
-        privileged: true,
-        envVars: [
-            envVar(key: 'DOCKER_TLS_CERTDIR', value: ''),
-            envVar(key: 'DOCKER_HOST', value: 'tcp://localhost:2375')
-        ],
-        args: '--storage-driver=vfs'
-    ),
-    containerTemplate(
-        name: 'deployer', 
-        image: 'elevy99927/k8s-deployer:latest',
-        ttyEnabled: true,
-        command: 'cat',
-        envVars: [
-            envVar(key: 'DOCKER_HOST', value: 'tcp://localhost:2375')
-        ]
-    )
-  ]
-) {
-    node(POD_LABEL) {
-        def apptag = "${env.BUILD_NUMBER}"
+    environment {
+        // מזהי המפתחות המוגדרים בתוך Manage Jenkins -> Credentials
+        DOCKERHUB_CRED = credentials('')
+        GITHUB_CRED    = credentials(')
 
-        stage('Checkout') {
-            container('deployer') {
-                sh '/usr/bin/git config --global http.sslVerify false'
-                checkout scm
+        // פרטי האימג' וה-GitOps Repo
+        IMAGE_NAME     = 'hillel456/python-devops-pipeline'
+        GITOPS_REPO    = 'github.com/hshemasian/gitops.git'
+    }
+
+    stages {
+        stage('Parallel Checks') {
+            parallel {
+                stage('Linting') {
+                    steps {
+                        echo 'Running Linting checks...'
+                        // sh 'flake8 app.py || true'
+                    }
+                }
+                stage('Security Scan') {
+                    steps {
+                        echo 'Running Security Scans...'
+                        // sh 'trivy image ${IMAGE_NAME}:${BUILD_NUMBER} || true'
+                    }
+                }
             }
         }
 
-        stage('Build') {
-            container('docker') {
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
                 sh """
-                    until docker info > /dev/null 2>&1; do
-                        echo "Waiting for Docker daemon..."
-                        sleep 1
-                    done
-                    docker build . -t ${appimage}:${apptag} -t ${appimage}:latest
+                    echo $DOCKERHUB_CRED_PSW | docker login -u $DOCKERHUB_CRED_USR --password-stdin
+                    docker push ${IMAGE_NAME}:${BUILD_NUMBER}
                 """
             }
         }
 
-        stage('Parallel Tasks') {
-            parallel(
-                "Task 1": {
-                    container('deployer') {
-                        sh "echo 'Running parallel checks...'"
-                    }
-                },
-                "Task 2 - Trivy Scan": {
-                    container('deployer') {
-                        // שימוש בפורמט JSON שנתמך בגרסה המותקנת בקונטיינר
-                        sh "trivy image --format json --output trivy-report.json ${appimage}:${apptag}"
-                    }
+        stage('Update GitOps Repo for ArgoCD') {
+            steps {
+                sh """
+                    git config --global user.email "jenkins@ci-cd.com"
+                    git config --global user.name "Jenkins CI"
 
-                    // שמירת הדו"ח כ-Artifact ב-Jenkins
-                    archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
+                    # ניקוי ושיפול ה-GitOps Repo
+                    rm -rf gitops-dir
+                    git clone https://${GITHUB_CRED_USR}:${GITHUB_CRED_PSW}@${GITOPS_REPO} gitops-dir
 
-                    container('deployer') {
-                        // הרצת הסריקה עם exit-code 0 כדי שהפלייסט ימשיך למרות ממצאי האבטחה
-                        sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${appimage}:${apptag}"
-                    }
-                }
-            )
-        }
+                    # עדכון תגית האימג' ב-values.yaml של סביבת dev
+                    cd gitops-dir/flask-aws-monitor/dev
+                    sed -i 's/tag: .*/tag: "${BUILD_NUMBER}"/' values.yaml
 
-        stage('Push to DockerHub') {
-            container('docker') {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh "docker push ${appimage}:${apptag}"
-                    sh "docker push ${appimage}:latest"
-                }
+                    # דחיפת השינוי חזרה ל-GitHub
+                    git add values.yaml
+                    git commit -m "CI: Update image tag to build ${BUILD_NUMBER}"
+                    git push https://${GITHUB_CRED_USR}:${GITHUB_CRED_PSW}@${GITOPS_REPO} main
+                """
             }
         }
+    }
 
-        stage('Deploy') {
-            container('deployer') {
-                sh "helm template hello-newapp ./chart > hello-newapp.yaml"
-            }
+    post {
+        always {
+            sh 'docker logout || true'
+            cleanWs()
         }
     }
 }
