@@ -6,7 +6,7 @@ image:
 service:
   type: ClusterIP
   port: 5000
-  targetPort: 5000
+  targetPort: 5001
 ingress:
   enabled: true
   host: app.local
