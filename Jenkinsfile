@@ -9,6 +9,7 @@ spec:
   - name: jnlp
     image: jenkins/inbound-agent:latest
     securityContext:
+      runAsUser: 0
       privileged: true
     volumeMounts:
     - name: docker-sock
