@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // מזהי המפתחות המוגדרים בתוך Manage Jenkins -> Credentials
+        // מזהי המפתחות כפי שמוגדרים בתוך Manage Jenkins -> Credentials
         DOCKERHUB_CRED = credentials('dockerhub-credentials')
         GITHUB_CRED    = credentials('github-credentials')
 
@@ -15,7 +15,6 @@ pipeline {
         stage('Code Quality & Linting') {
             steps {
                 echo 'Running Code Quality checks on python code...'
-                // בדיקת איכות הקוד לפני הבנייה
                 sh 'flake8 app.py || true'
             }
         }
@@ -29,7 +28,6 @@ pipeline {
         stage('Security Scan') {
             steps {
                 echo 'Running Security Scan on the built image...'
-                // הסריקה מבוצעת רק לאחר שהאימג' נבנה בהצלחה
                 sh "trivy image ${IMAGE_NAME}:${BUILD_NUMBER} || true"
             }
         }
@@ -49,19 +47,18 @@ pipeline {
                     git config --global user.email "jenkins@ci-cd.com"
                     git config --global user.name "Jenkins CI"
 
-                    # ניקוי ושיפול ה-GitOps Repo
+                    # 1. ניקוי ושיפול ה-GitOps Repo
                     rm -rf gitops-dir
                     git clone https://${GITHUB_CRED_USR}:${GITHUB_CRED_PSW}@${GITOPS_REPO} gitops-dir
 
-                    # 1. עדכון תגית האימג' ב-values.yaml
-                    cd gitops-dir/flask-aws-monitor/dev
-                    sed -i 's/tag: .*/tag: "${BUILD_NUMBER}"/' values.yaml
+                    # 2. עדכון תגית האימג' ב-values.yaml בתוך תיקיית chart
+                    sed -i 's/tag: .*/tag: "${BUILD_NUMBER}"/' gitops-dir/chart/values.yaml
 
-                    # 2. אריזת ה-Helm Chart לקובץ אחד (.tgz)
-                    cd ..
-                    helm package dev/
+                    # 3. אריזת ה-Helm Chart מתוך תיקיית chart לקובץ tgz
+                    helm package gitops-dir/chart/ -d gitops-dir/
 
-                    # 3. דחיפת השינויים (הן ה-values והן קובץ ה-Helm הארוז) ל-GitHub
+                    # 4. דחיפת השינויים ל-GitHub
+                    cd gitops-dir
                     git add .
                     git commit -m "CI: Update image tag to build ${BUILD_NUMBER} and package helm chart"
                     git push https://${GITHUB_CRED_USR}:${GITHUB_CRED_PSW}@${GITOPS_REPO} main
