@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // מזהי המפתחות כפי שמוגדרים בתוך Manage Jenkins -> Credentials
+        // רושמים את ה-ID שהגדרת ב-Jenkins Credentials ולא את הטוקן עצמו!
         DOCKERHUB_CRED = credentials('dockerhub-credentials')
         GITHUB_CRED    = credentials('github-credentials')
 
