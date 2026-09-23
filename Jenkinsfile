@@ -65,7 +65,7 @@ spec:
             }
         }
 
-        stage('Update Helm Chart for ArgoCD') {
+        stage('Update & Render Helm Chart for ArgoCD') {
             steps {
                 sh """
                     git config --global user.email "jenkins@ci-cd.com"
@@ -74,8 +74,16 @@ spec:
                     rm -rf gitops-dir
                     git clone https://${GITHUB_CRED_USR}:${GITHUB_CRED_PSW}@${GITOPS_REPO} gitops-dir
 
+                    # עדכון ה-Tag ב-values.yaml
                     sed -i 's/tag: .*/tag: "${BUILD_NUMBER}"/' gitops-dir/chart/values.yaml
 
+                    # הורדה זמנית של Helm CLI לביצוע ה-template
+                    curl -sSL https://get.helm.sh/helm-v3.16.1-linux-amd64.tar.gz | tar xz -C /tmp
+
+                    # בדיקת ורינדור ה-Template בדיוק לפי פקודת המורה
+                    /tmp/linux-amd64/helm template my-app gitops-dir/chart --set image.tag=${BUILD_NUMBER}
+
+                    # שמירה ודחיפה ל-GitOps Repository
                     cd gitops-dir
                     git add .
                     git commit -m "CI: Update image tag to build ${BUILD_NUMBER}"
