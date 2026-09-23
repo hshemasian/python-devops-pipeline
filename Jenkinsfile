@@ -4,7 +4,7 @@ pipeline {
     environment {
         // רושמים את ה-ID שהגדרת ב-Jenkins Credentials ולא את הטוקן עצמו!
         DOCKERHUB_CRED = credentials('dockerhub-credentials')
-        GITHUB_CRED    = credentials('github-credentials')
+        GITHUB_CRED    = credentials('github-cred')
 
         // פרטי האימג' וה-GitOps Repo
         IMAGE_NAME     = 'hillel456/python-devops-pipeline'
