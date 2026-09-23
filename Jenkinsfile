@@ -65,7 +65,7 @@ spec:
             }
         }
 
-        stage('Update & Package Helm Chart for ArgoCD') {
+        stage('Update Helm Chart for ArgoCD') {
             steps {
                 sh """
                     git config --global user.email "jenkins@ci-cd.com"
@@ -76,11 +76,9 @@ spec:
 
                     sed -i 's/tag: .*/tag: "${BUILD_NUMBER}"/' gitops-dir/chart/values.yaml
 
-                    helm package gitops-dir/chart/ -d gitops-dir/
-
                     cd gitops-dir
                     git add .
-                    git commit -m "CI: Update image tag to build ${BUILD_NUMBER} and package helm chart"
+                    git commit -m "CI: Update image tag to build ${BUILD_NUMBER}"
                     git push https://${GITHUB_CRED_USR}:${GITHUB_CRED_PSW}@${GITOPS_REPO} main
                 """
             }
