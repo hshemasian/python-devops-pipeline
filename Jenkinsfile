@@ -1,12 +1,35 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: jnlp
+    image: jenkins/inbound-agent:latest
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+    - name: docker-bin
+      mountPath: /usr/bin/docker
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+  - name: docker-bin
+    hostPath:
+      path: /usr/bin/docker
+'''
+        }
+    }
 
     environment {
-        // רושמים את ה-ID שהגדרת ב-Jenkins Credentials ולא את הטוקן עצמו!
         DOCKERHUB_CRED = credentials('dockerhub-credentials')
         GITHUB_CRED    = credentials('github-cred')
 
-        // פרטי האימג' וה-GitOps Repo
         IMAGE_NAME     = 'hillel456/python-devops-pipeline'
         GITOPS_REPO    = 'github.com/hshemasian/gitops.git'
     }
@@ -47,17 +70,13 @@ pipeline {
                     git config --global user.email "jenkins@ci-cd.com"
                     git config --global user.name "Jenkins CI"
 
-                    # 1. ניקוי ושיפול ה-GitOps Repo
                     rm -rf gitops-dir
                     git clone https://${GITHUB_CRED_USR}:${GITHUB_CRED_PSW}@${GITOPS_REPO} gitops-dir
 
-                    # 2. עדכון תגית האימג' ב-values.yaml בתוך תיקיית chart
                     sed -i 's/tag: .*/tag: "${BUILD_NUMBER}"/' gitops-dir/chart/values.yaml
 
-                    # 3. אריזת ה-Helm Chart מתוך תיקיית chart לקובץ tgz
                     helm package gitops-dir/chart/ -d gitops-dir/
 
-                    # 4. דחיפת השינויים ל-GitHub
                     cd gitops-dir
                     git add .
                     git commit -m "CI: Update image tag to build ${BUILD_NUMBER} and package helm chart"
@@ -70,7 +89,7 @@ pipeline {
     post {
         always {
             sh 'docker logout || true'
-            cleanWs()
+            deleteDir()
         }
     }
 }
