@@ -1,0 +1,217 @@
+<html lang="he"><head>
+  <script type="text/javascript" src="js/form.js"></script>
+  
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+ 
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="shortcut icon" href="images/elbit.png" type="image/x-icon">
+
+  <title>אלביט</title>
+
+  
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Poppins:400,600,700&amp;display=swap" rel="stylesheet">
+
+  
+  <link href="css/style.css" rel="stylesheet">
+  
+  <link href="css/responsive.css" rel="stylesheet">
+</head>
+
+<body dir="rtl">
+  <div class="hero_area">
+   
+   <div class="hero_bg_box">
+    <div class="img-box">
+      <img src="images/Hermes_900.jpg" alt="Hermes_900">
+      
+      
+    </div>
+  </div>
+
+  <header class="header_section">
+    <div class="header_top">
+      <div class="container-fluid">
+        <div class="contact_link-container">
+          <a href="https://www.google.com/maps/place/%D7%90%D7%9C%D7%91%D7%99%D7%98+%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA+%D7%91%D7%A2%22%D7%9E%E2%80%AD/@32.7883208,34.9617678,17z/data=!3m1!4b1!4m6!3m5!1s0x151dbb5d7271f9b1:0x729dadcab9c07b20!8m2!3d32.7883208!4d34.9617678!16s%2Fg%2F1tcy_88x?entry=ttu" class="contact_link1">
+            <i class="fa fa-map-marker" aria-hidden="true"></i>
+            <span>
+              מרכז תעשיות מדע, חיפה, ישראל
+            </span>
+          </a>
+          <a href="" class="contact_link2">
+            <i class="fa fa-phone" aria-hidden="true"></i>
+            <span>
+              טלפון : 04-831-5315 
+            </span>
+          </a>
+          <a href="" class="contact_link3">
+            <i class="fa fa-envelope" aria-hidden="true"></i>
+            <span>
+              dalia.bodinger@elbitsystems.com
+            </span>
+          </a>
+          <span>
+            <img src="images/elbit.png" width="350" height="100" alt="elbit">
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="header_bottom">
+      <div class="container-fluid" style="background-color: #4f4b4b;">
+        <nav class="navbar navbar-expand-lg custom_nav-container">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class=""></span>
+          </button>
+
+          <div class="collapse navbar-collapse ml-auto" id="navbarSupportedContent">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="index.html">דף בית<span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="about.html"> אודות</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="service.html"> שירותים </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="technologies.html">טכנולוגיות</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="contact.html">צור קשר</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="Manager.html">דף מנהל<span class="sr-only">(current)</span></a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-image: url('images/elbit.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .containerlogin {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      width: 100%;
+      padding-right: 15px;
+      padding-left: 15px;
+      margin-right: auto;
+      margin-left: auto;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    input[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+
+  
+  <div class="containerlogin">
+    <h2>התחברות</h2>
+    <form id="loginForm" method="post">
+      <input type="text" id="username" name="username" placeholder="שם משתמש">
+      <input type="password" id="password" name="password" placeholder="סיסמה">
+      <input type="submit" value="כניסה">
+    </form>
+    <p id="error" class="error"></p>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+      var error = document.getElementById('error');
+
+      if (username === 'admin' && password === '1234') {
+        window.location.href = "Table.html";
+      } else {
+        error.textContent = 'שם משתמש או סיסמה לא חוקיים.';
+      }
+    });
+  </script>
+
+<script>
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	
+</script>
+
+</div></body></html>

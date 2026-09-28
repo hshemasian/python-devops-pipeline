@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>עדכון פרטי עובד</title>
+</head>
+<body>
+    <h2>עדכון פרטי עובד</h2>
+    <form action="update_employee.asp" method="post">
+        <label for="empNumber">בחר מספר עובד לעדכון:</label>
+        <input type="text" id="empNumber" name="empNumber" required>
+        <label for="firstName">שם פרטי חדש:</label>
+        <input type="text" id="firstName" name="firstName" required>
+        <label for="lastName">שם משפחה חדש:</label>
+        <input type="text" id="lastName" name="lastName" required>
+        <label for="birthYear">שנת לידה חדשה:</label>
+        <input type="text" id="birthYear" name="birthYear" required>
+        <label for="email">דואר אלקטרוני חדש:</label>
+        <input type="email" id="email" name="email" required>
+        <input type="submit" value="עדכן פרטים">
+    </form>
+</body>
+</html>

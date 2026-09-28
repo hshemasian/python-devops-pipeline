@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>הוספת רשומה</title>
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('images/painting.avif');
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        form {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            width: 200px;
+            padding: 5px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+        }
+        button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <form action="/Adding_data.asp" method="post">
+        <label for="fname">שם פרטי</label>
+        <input type="text" id="fname" name="fname"><br><br>
+        <label for="lname">שם משפחה</label>
+        <input type="text" id="lname" name="lname"><br><br>
+        <label for="byear">שנת לידה</label>
+        <input type="text" id="byear" name="byear"><br><br>
+        <label for="email">אימייל</label>
+        <input type="text" id="email" name="email"><br><br>
+        <button type="submit">עדכן</button>
+    </form>
+</body>
+</html>
