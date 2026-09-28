@@ -1,3 +1,5 @@
+@Library('my-shared-library') _
+
 pipeline {
     agent {
         kubernetes {
@@ -38,21 +40,24 @@ spec:
     stages {
         stage('Code Quality & Linting') {
             steps {
-                echo 'Running Code Quality checks on python code...'
-                sh 'flake8 app.py || true'
+                // קריאה לבדיקת האיכות עם הגדרת סוג הפרויקט כ-python
+                codeQuality(type: 'python')
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+                script {
+                    // קריאה לפונקציית הבנייה מ-vars/myLibrary.groovy
+                    myLibrary.buildApp("${IMAGE_NAME}:${BUILD_NUMBER}")
+                }
             }
         }
 
         stage('Security Scan') {
             steps {
-                echo 'Running Security Scan on the built image...'
-                sh "trivy image ${IMAGE_NAME}:${BUILD_NUMBER} || true"
+                // קריאה לסריקת האבטחה ב-Trivy מ-vars/securityScan.groovy
+                securityScan("${IMAGE_NAME}:${BUILD_NUMBER}")
             }
         }
 
@@ -80,7 +85,7 @@ spec:
                     # הורדה זמנית של Helm CLI לביצוע ה-template
                     curl -sSL https://get.helm.sh/helm-v3.16.1-linux-amd64.tar.gz | tar xz -C /tmp
 
-                    # בדיקת ורינדור ה-Template בדיוק לפי פקודת המורה
+                    # בדיקת ורינדור ה-Template
                     /tmp/linux-amd64/helm template my-app gitops-dir/chart --set image.tag=${BUILD_NUMBER}
 
                     # שמירה ודחיפה ל-GitOps Repository
@@ -95,7 +100,10 @@ spec:
 
     post {
         always {
-            sh 'docker logout || true'
+            script {
+                // קריאה לפונקציית הניקוי מ-vars/myLibrary.groovy
+                myLibrary.cleanup()
+            }
             deleteDir()
         }
     }
