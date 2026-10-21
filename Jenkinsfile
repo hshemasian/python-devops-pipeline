@@ -40,7 +40,6 @@ spec:
     stages {
         stage('Code Quality & Linting') {
             steps {
-                // קריאה לבדיקת האיכות עם הגדרת סוג הפרויקט כ-python
                 codeQuality(type: 'python')
             }
         }
@@ -48,7 +47,6 @@ spec:
         stage('Build Docker Image') {
             steps {
                 script {
-                    // קריאה לפונקציית הבנייה מ-vars/myLibrary.groovy
                     myLibrary.buildApp("${IMAGE_NAME}:${BUILD_NUMBER}")
                 }
             }
@@ -56,7 +54,6 @@ spec:
 
         stage('Security Scan') {
             steps {
-                // קריאה לסריקת האבטחה ב-Trivy מ-vars/securityScan.groovy
                 securityScan("${IMAGE_NAME}:${BUILD_NUMBER}")
             }
         }
@@ -101,7 +98,6 @@ spec:
     post {
         always {
             script {
-                // קריאה לפונקציית הניקוי מ-vars/myLibrary.groovy
                 myLibrary.cleanup()
             }
             deleteDir()
