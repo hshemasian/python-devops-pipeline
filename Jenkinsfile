@@ -29,12 +29,20 @@ spec:
         }
     }
 
+    // הוספת פרמטרים דינמיים המונעים Hardcoding ומאפשרים שימוש חוזר בפרויקטים אחרים
+    parameters {
+        string(name: 'APP_NAME', defaultValue: 'python-devops-pipeline', description: 'Name of the application / Docker image')
+        string(name: 'DOCKER_USER', defaultValue: 'hillel456', description: 'Docker Hub Username')
+        string(name: 'GITOPS_REPO_PATH', defaultValue: 'github.com/hshemasian/gitops.git', description: 'GitOps repository path')
+    }
+
     environment {
         DOCKERHUB_CRED = credentials('dockerhub-credentials')
         GITHUB_CRED    = credentials('github-cred')
 
-        IMAGE_NAME     = 'hillel456/python-devops-pipeline'
-        GITOPS_REPO    = 'github.com/hshemasian/gitops.git'
+        // שימוש במשתנים דינמיים מתוך ה-parameters במקום ערכים קבועים
+        IMAGE_NAME     = "${params.DOCKER_USER}/${params.APP_NAME}"
+        GITOPS_REPO    = "${params.GITOPS_REPO_PATH}"
     }
 
     stages {
