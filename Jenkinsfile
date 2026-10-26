@@ -38,6 +38,16 @@ spec:
     }
 
     stages {
+        stage('Prepare Tag') {
+            steps {
+                script {
+                    // יצירת טאג קריא ומסודר הכולל את מספר הבולד, התאריך והשעה
+                    env.IMAGE_TAG = "build-${env.BUILD_NUMBER}_${new Date().format('yyyy-MM-dd_HH-mm-ss')}"
+                    echo "Generated Image Tag: ${env.IMAGE_TAG}"
+                }
+            }
+        }
+
         stage('Code Quality & Linting') {
             steps {
                 codeQuality(type: 'python')
@@ -47,14 +57,14 @@ spec:
         stage('Build Docker Image') {
             steps {
                 script {
-                    myLibrary.buildApp("${IMAGE_NAME}:${BUILD_NUMBER}")
+                    myLibrary.buildApp("${IMAGE_NAME}:${env.IMAGE_TAG}")
                 }
             }
         }
 
         stage('Security Scan') {
             steps {
-                securityScan("${IMAGE_NAME}:${BUILD_NUMBER}")
+                securityScan("${IMAGE_NAME}:${env.IMAGE_TAG}")
             }
         }
 
@@ -62,7 +72,7 @@ spec:
             steps {
                 sh """
                     echo $DOCKERHUB_CRED_PSW | docker login -u $DOCKERHUB_CRED_USR --password-stdin
-                    docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                    docker push ${IMAGE_NAME}:${env.IMAGE_TAG}
                 """
             }
         }
@@ -76,19 +86,19 @@ spec:
                     rm -rf gitops-dir
                     git clone https://${GITHUB_CRED_USR}:${GITHUB_CRED_PSW}@${GITOPS_REPO} gitops-dir
 
-                    # עדכון ה-Tag ב-values.yaml
-                    sed -i 's/tag: .*/tag: "${BUILD_NUMBER}"/' gitops-dir/chart/values.yaml
+                    # עדכון ה-Tag המעודכן ב-values.yaml
+                    sed -i 's/tag: .*/tag: "${env.IMAGE_TAG}"/' gitops-dir/chart/values.yaml
 
                     # הורדה זמנית של Helm CLI לביצוע ה-template
                     curl -sSL https://get.helm.sh/helm-v3.16.1-linux-amd64.tar.gz | tar xz -C /tmp
 
-                    # בדיקת ורינדור ה-Template
-                    /tmp/linux-amd64/helm template my-app gitops-dir/chart --set image.tag=${BUILD_NUMBER}
+                    # בדיקת ורינדור ה-Template עם הטאג החדש
+                    /tmp/linux-amd64/helm template my-app gitops-dir/chart --set image.tag=${env.IMAGE_TAG}
 
                     # שמירה ודחיפה ל-GitOps Repository
                     cd gitops-dir
                     git add .
-                    git commit -m "CI: Update image tag to build ${BUILD_NUMBER}"
+                    git commit -m "CI: Update image tag to ${env.IMAGE_TAG}"
                     git push https://${GITHUB_CRED_USR}:${GITHUB_CRED_PSW}@${GITOPS_REPO} main
                 """
             }
